@@ -1,0 +1,19 @@
+{
+  "name": "janfish/security",
+  "description": "Encrypt、Decrypt、Sign、Verify with RSA",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Robert",
+      "email": "robert@janfish.cn"
+    }
+  ],
+  "require": {
+    "php": ">=7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Janfish\\Security\\": "src/"
+    }
+  }
+}
