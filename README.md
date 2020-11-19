@@ -76,3 +76,15 @@ $result = $rsa->verify('hello',$signedData,Rsa::OPENSSL_ALGO_SHA256);
 | PKCS1_SSLV23_PADDING | | 2 |
 | PKCS1_NO_PADDING |  | 3 |
 | PKCS1_OAEP_PADDING | | 4 |
+
+### Tips
+
+- When OpenSSL is used "OPENSSL_NO_PADDING" to padding parameter, you need to manually fill in the original data
+
+``` 
+$str = str_pad("hello", 256); //128 or 256 
+$rsa = new RSA();
+$rsa->setPubKey($pub);
+$encodedData = $rsa->encrypt($str, RSA::OPENSSL_NO_PADDING);
+```
+

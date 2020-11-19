@@ -97,7 +97,6 @@ class RSA
     public function encrypt(string $source, string $padding = self::OPENSSL_PKCS1_PADDING): string
     {
         openssl_public_encrypt($source, $encryptData, $this->_pubKey, $padding);
-        openssl_free_key($this->_pubKey);
         return base64_encode($encryptData);
     }
 
@@ -109,7 +108,6 @@ class RSA
     public function decrypt($encryptData, string $padding = self::OPENSSL_PKCS1_PADDING)
     {
         openssl_private_decrypt(base64_decode($encryptData), $decryptData, $this->_priKey, $padding);
-        openssl_free_key($this->_priKey);
         return $decryptData;
     }
 
@@ -121,7 +119,6 @@ class RSA
     public function sign(string $source, $signType = self::OPENSSL_ALGO_SHA1)
     {
         openssl_sign($source, $sign, $this->_priKey, $signType);
-        openssl_free_key($this->_priKey);
         return base64_encode($sign);
     }
 
@@ -133,8 +130,20 @@ class RSA
      */
     public function verify(string $source, string $sign, $signType = self::OPENSSL_ALGO_SHA1): bool
     {
-        $result = openssl_verify($source, base64_decode($sign), $this->_pubKey, $signType);
-        openssl_free_key($this->_pubKey);
-        return (bool)$result;
+        return (bool)openssl_verify($source, base64_decode($sign), $this->_pubKey, $signType);
     }
+
+    /**
+     *
+     */
+    public function __destruct()
+    {
+        if ($this->_priKey) {
+            openssl_free_key($this->_priKey);
+        }
+        if ($this->_pubKey) {
+            openssl_free_key($this->_pubKey);
+        }
+    }
+
 }
