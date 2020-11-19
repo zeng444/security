@@ -1,6 +1,8 @@
 # Usage
 
-### Generate Rsa keys
+## RSA
+
+#### Generate Rsa keys
 
 > the available key lengths are 1024 and 2048
 
@@ -10,7 +12,7 @@ $ openssl rsa -in rsa_private_key.pem -pubout -out rsa_public_key.pem
 ```
 
 
-### Encrypt & Sign
+#### Encrypt & Sign
 
 - prepare keys
 
@@ -51,7 +53,7 @@ $rsa->setPubKey($pri);
 $result = $rsa->verify('hello',$signedData,Rsa::OPENSSL_ALGO_SHA256);
 ```
 
-### Support Params
+#### Support Params
 
 - Signature Algorithm Type
 
@@ -77,7 +79,7 @@ $result = $rsa->verify('hello',$signedData,Rsa::OPENSSL_ALGO_SHA256);
 | PKCS1_NO_PADDING |  | 3 |
 | PKCS1_OAEP_PADDING | | 4 |
 
-### Tips
+#### Tips
 
 - When OpenSSL is used "OPENSSL_NO_PADDING" to padding parameter, you need to manually fill in the original data
 
@@ -88,3 +90,15 @@ $rsa->setPubKey($pub);
 $encodedData = $rsa->encrypt($str, RSA::OPENSSL_NO_PADDING);
 ```
 
+## Encryption
+
+```
+$encryption= new Encryption(['cipher' => 'AES-256-CFB']); //AES-256-CFB
+$encode = $encryption->encrypt("hello", 'keyToMyHeart');
+$decode = $encryption->decrypt($encode, 'keyToMyHeart');
+var_dump([
+    $encryption->getIv(),
+    $encode,
+    $decode
+]);
+```
