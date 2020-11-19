@@ -47,6 +47,17 @@ class RSA
     private $_pubKey;
 
     /**
+     * RSA constructor.
+     * @throws \Exception
+     */
+    public function __construct()
+    {
+        if (!extension_loaded('openssl')) {
+            throw new \Exception('openssl extension is not exist');
+        }
+    }
+
+    /**
      * @param string $string
      * @throws \Exception
      */
