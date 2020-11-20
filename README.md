@@ -90,10 +90,10 @@ $rsa->setPubKey($pub);
 $encodedData = $rsa->encrypt($str, RSA::OPENSSL_NO_PADDING);
 ```
 
-## Encryption
+## Other Encryption
 
 ```
-$encryption= new Encryption(['cipher' => 'AES-256-CFB']); //AES-256-CFB
+$encryption= new Crypt(['cipher' => 'AES-256-CFB']); //AES-256-CFB
 $encode = $encryption->encrypt("hello", 'keyToMyHeart');
 $decode = $encryption->decrypt($encode, 'keyToMyHeart');
 var_dump([

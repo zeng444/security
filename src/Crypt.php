@@ -3,10 +3,10 @@
 namespace Janfish\Security;
 
 /**
- * Class Encryption
+ * Class Crypt
  * @package Janfish\Security
  */
-class Encryption
+class Crypt
 {
 
     /**
@@ -18,6 +18,7 @@ class Encryption
     const OPENSSL_RAW_DATA = 1;
 
     const OPENSSL_ZERO_PADDING = 2;
+
     /**
      * @var
      */
