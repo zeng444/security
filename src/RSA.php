@@ -2,6 +2,8 @@
 
 namespace Janfish\Security;
 
+use Janfish\Security\Exception\EncryptionException;
+
 /**
  * Class RSA
  * @package Janfish\Security
@@ -53,7 +55,7 @@ class RSA
     public function __construct()
     {
         if (!extension_loaded('openssl')) {
-            throw new \Exception('openssl extension is not exist');
+            throw new EncryptionException('openssl extension is not exist');
         }
     }
 
@@ -61,7 +63,7 @@ class RSA
      * @param string $string
      * @throws \Exception
      */
-    public function setPubKey(string $string): void
+    public function setPubKey(string $string)
     {
         if (strpos($string, 'BEGIN') === false) {
             $string = "-----BEGIN PUBLIC KEY-----\n" .
@@ -70,7 +72,7 @@ class RSA
         }
         $this->_pubKey = openssl_pkey_get_public($string);
         if (!$this->_pubKey) {
-            throw new \Exception('请检查公钥文件格式');
+            throw new EncryptionException('请检查公钥文件格式');
         }
     }
 
@@ -78,7 +80,7 @@ class RSA
      * @param string $key
      * @return string
      */
-    private function formatKey(string $key)
+    private function formatKey(string $key): string
     {
         return trim(wordwrap($key, 64, "\n", true));
     }
@@ -87,7 +89,7 @@ class RSA
      * @param string $string
      * @throws \Exception
      */
-    public function setPriKey(string $string): void
+    public function setPriKey(string $string)
     {
         if (strpos($string, 'BEGIN') === false) {
             $string = "-----BEGIN RSA PRIVATE KEY-----\n" .
@@ -96,7 +98,7 @@ class RSA
         }
         $this->_priKey = openssl_pkey_get_private($string);
         if (!$this->_priKey) {
-            throw new \Exception('请检查私钥文件格式');
+            throw new EncryptionException('请检查私钥文件格式');
         }
     }
 
@@ -112,11 +114,11 @@ class RSA
     }
 
     /**
-     * @param $encryptData
+     * @param string $encryptData
      * @param string $padding
      * @return mixed
      */
-    public function decrypt($encryptData, string $padding = self::OPENSSL_PKCS1_PADDING)
+    public function decrypt(string $encryptData, string $padding = self::OPENSSL_PKCS1_PADDING)
     {
         openssl_private_decrypt(base64_decode($encryptData), $decryptData, $this->_priKey, $padding);
         return $decryptData;
@@ -125,9 +127,9 @@ class RSA
     /**
      * @param string $source
      * @param int $signType
-     * @return mixed
+     * @return string
      */
-    public function sign(string $source, $signType = self::OPENSSL_ALGO_SHA1)
+    public function sign(string $source, int $signType = self::OPENSSL_ALGO_SHA1): string
     {
         openssl_sign($source, $sign, $this->_priKey, $signType);
         return base64_encode($sign);
@@ -139,7 +141,7 @@ class RSA
      * @param int $signType
      * @return bool
      */
-    public function verify(string $source, string $sign, $signType = self::OPENSSL_ALGO_SHA1): bool
+    public function verify(string $source, string $sign, int $signType = self::OPENSSL_ALGO_SHA1): bool
     {
         return (bool)openssl_verify($source, base64_decode($sign), $this->_pubKey, $signType);
     }

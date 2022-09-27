@@ -1,11 +1,11 @@
 <?php
 
-require '../vendor/autoload.php';
+require (dirname(__DIR__)) . '/vendor/autoload.php';
 
 use \Janfish\Security\RSA;
 
-$pri = file_get_contents('keys/rsa_private_key.pem');
-$pub = file_get_contents('keys/rsa_public_key.pem');
+$pri = file_get_contents(__DIR__ . '/keys/rsa_private_key.pem');
+$pub = file_get_contents(__DIR__ . '/keys/rsa_public_key.pem');
 
 
 //encode

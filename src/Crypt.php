@@ -2,6 +2,8 @@
 
 namespace Janfish\Security;
 
+use Janfish\Security\Exception\EncryptionException;
+
 /**
  * Class Crypt
  * @package Janfish\Security
@@ -15,9 +17,13 @@ class Crypt
 //    const  DEFAULT_CIPHER = 'AES-256-CFB';
     const  DEFAULT_CIPHER = 'des-ede3';
 
+    const OPENSSL_DEFAULT_DATA = 0;
+
     const OPENSSL_RAW_DATA = 1;
 
     const OPENSSL_ZERO_PADDING = 2;
+
+    const OPENSSL_NO_PADDING = 3;
 
     /**
      * @var
@@ -36,16 +42,19 @@ class Crypt
 
     /**
      * @param array $options
-     * @throws \Exception
+     * @throws EncryptionException
      */
     public function __construct(array $options = [])
     {
+        if (!extension_loaded('openssl')) {
+            throw new EncryptionException('openssl extension is not exist');
+        }
         if (isset($options['cipher'])) {
             $this->cipher = $options['cipher'];
         }
-        $this->cipher = $this->cipher ? $this->cipher : self::DEFAULT_CIPHER;
+        $this->cipher = $this->cipher ?: self::DEFAULT_CIPHER;
         if (!in_array($this->cipher, self::getSupportCipher())) {
-            throw new \Exception('不支持的加密算法');
+            throw new EncryptionException('不支持的加密算法');
         }
         $this->ivSize = openssl_cipher_iv_length($this->cipher);
     }
@@ -58,30 +67,11 @@ class Crypt
         return openssl_get_cipher_methods(false);
     }
 
-
-    /**
-     * 将加密后的字符串以及向量一并返回
-     * @param $data
-     * @param string $encryptKey
-     * @param int $option
-     * @return string
-     * @throws \Exception
-     */
-    public function encrypt($data, $encryptKey = '', $option = self::OPENSSL_RAW_DATA)
-    {
-        $iv = $this->makeIv();
-        $encryptedData = openssl_encrypt($data, $this->cipher, $encryptKey, $option, $iv);
-        return $iv . $encryptedData;
-    }
-
     /**
      * 计算向量
      * @return string
-     * @throws \Exception
-     * @author Robert
-     *
      */
-    private function makeIv()
+    public function makeIv(): string
     {
         $this->iv = openssl_random_pseudo_bytes($this->ivSize); //随机生成向量
         return $this->iv;
@@ -96,14 +86,36 @@ class Crypt
     }
 
     /**
-     * @param $encryptedData
+     * 将加密后的字符串以及向量一并返回
+     * @param string $data
      * @param string $encryptKey
+     * @param string $iv
      * @param int $option
      * @return false|string
      */
-    public function decrypt($encryptedData, $encryptKey = '', $option = self::OPENSSL_RAW_DATA)
+    public function encrypt(string $data, string $encryptKey, string $iv = null, int $option = self::OPENSSL_DEFAULT_DATA)
     {
-        return openssl_decrypt(substr($encryptedData, $this->ivSize), $this->cipher, $encryptKey, $option, $this->parseIv($encryptedData));
+        if ($iv) {
+            return openssl_encrypt($data, $this->cipher, $encryptKey, $option, $iv);
+        }
+        $iv = $this->makeIv();
+        return $iv . openssl_encrypt($data, $this->cipher, $encryptKey, $option, $iv);
+    }
+
+    /**
+     * @param string $encryptedData
+     * @param string $encryptKey
+     * @param string $iv
+     * @param int $option
+     * @return false|string
+     */
+    public function decrypt(string $encryptedData, string $encryptKey, string $iv = null, int $option = self::OPENSSL_DEFAULT_DATA)
+    {
+        if (!$iv) {
+            $iv = $this->parseIv($encryptedData);
+            $encryptedData = substr($encryptedData, $this->ivSize);
+        }
+        return openssl_decrypt($encryptedData, $this->cipher, $encryptKey, $option, $iv);
     }
 
     /**
@@ -113,7 +125,7 @@ class Crypt
      * @author Robert
      *
      */
-    public function parseIv($encryptedData)
+    public function parseIv($encryptedData): string
     {
         $this->iv = substr($encryptedData, 0, $this->ivSize);
         return $this->iv;

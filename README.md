@@ -93,7 +93,7 @@ $encodedData = $rsa->encrypt($str, RSA::OPENSSL_NO_PADDING);
 ## Other Encryption
 
 ```
-$encryption= new Crypt(['cipher' => 'AES-256-CFB']); //AES-256-CFB
+$encryption= new Crypt(['cipher' => 'aes-256-cbc']);
 $encode = $encryption->encrypt("hello", 'keyToMyHeart');
 $decode = $encryption->decrypt($encode, 'keyToMyHeart');
 var_dump([
@@ -101,4 +101,24 @@ var_dump([
     $encode,
     $decode
 ]);
+```
+
+
+```
+
+$en = new Crypt(['cipher' => 'aes-256-cbc']); //des-ede3;
+$iv = '0123456789abcdef';
+//$iv = $en->makeIv();
+$clientSecret = 'nuasndu89382j3d3d9238';
+
+$encode = $en->encrypt("hello", $clientSecret, $iv);
+$decode = $en->decrypt($encode, $clientSecret, $iv);
+
+var_dump([
+    $en->getIv(),
+    $en->ivSize,
+    $encode,
+    $decode
+]);
+
 ```
